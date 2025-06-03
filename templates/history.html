@@ -4,32 +4,61 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Analysis History - PicklePro</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+  <link
+    rel="stylesheet"
+    as="style"
+    onload="this.rel='stylesheet'"
+    href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Spline+Sans%3Awght%40400%3B500%3B700"
+  />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 </head>
-<body class="bg-gray-100 text-gray-900">
+<body class="bg-[#101a23] text-white" style='font-family: "Spline Sans", "Noto Sans", sans-serif;'>
 
+  <!-- HEADER -->
+  <header class="flex items-center justify-between border-b border-[#223649] px-10 py-3">
+    <div class="flex items-center gap-4">
+      <div class="size-4 text-white">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z"
+            fill="currentColor"></path>
+        </svg>
+      </div>
+      <h2 class="text-white text-lg font-bold tracking-[-0.015em]">PicklePro</h2>
+    </div>
+    <div class="flex items-center gap-9">
+      <a class="text-white text-sm font-medium" href="{{ url_for('index') }}">Home</a>
+      <a class="text-white text-sm font-medium" href="#">Features</a>
+      <a class="text-white text-sm font-medium" href="#">Pricing</a>
+      <a class="text-white text-sm font-medium" href="#">Support</a>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
   <div class="max-w-4xl mx-auto py-10 px-4">
-    <h1 class="text-3xl font-bold text-center mb-8 text-blue-700">📜 Analysis History</h1>
+    <h1 class="text-3xl font-bold text-center mb-8 text-white-400">📜 Analysis History</h1>
 
     {% if analyses %}
       <div class="grid grid-cols-1 gap-6">
         {% for a in analyses %}
-          <div class="bg-white shadow-md rounded-lg p-6 border border-gray-200 hover:shadow-lg transition duration-300">
+          <div class="bg-[#1a2733] border border-[#2b3b4d] shadow-md rounded-lg p-6 hover:shadow-lg transition duration-300">
             <div class="flex justify-between items-center mb-2">
-              <h2 class="text-lg font-semibold text-blue-600">Video ID: {{ a.video_id }}</h2>
-              <span class="text-sm text-gray-500">{{ a.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+              <h2 class="text-lg font-semibold text-green-300">Video ID: {{ a.video_id }}</h2>
+              <span class="text-sm text-gray-400">{{ a.local_created_at.strftime('%Y-%m-%d %H:%M') }}</span>
             </div>
-            <p class="mb-2"><strong>Score:</strong>
-              <span class="{{ 'text-green-600' if a.score >= 75 else 'text-red-600' }}">{{ a.score }}</span>
+            <p class="mb-2">
+              <strong>Score:</strong>
+              <span class="{{ 'text-green-400' if a.score >= 75 else 'text-red-400' }}">{{ a.score }}</span>
             </p>
             <p><strong>Feedback:</strong> {{ a.feedback }}</p>
-            <div class="mt-4">
+            <div class="mt-4 flex gap-4">
               <a href="{{ url_for('feedback_page', video_id=a.video_id) }}"
-                 class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm transition">
+                 class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm transition">
                 View Full Feedback
               </a>
               <a href="{{ url_for('export_pdf', video_id=a.video_id) }}"
-                 class="inline-block ml-2 text-blue-600 underline hover:text-blue-800 text-sm">
+                 class="text-blue-300 underline hover:text-blue-400 text-sm">
                 Download PDF Report
               </a>
             </div>
@@ -37,12 +66,11 @@
         {% endfor %}
       </div>
     {% else %}
-      <p class="text-center text-gray-600">No analyses found yet. Upload a video to get started.</p>
+      <p class="text-center text-gray-400">No analyses found yet. Upload a video to get started.</p>
     {% endif %}
 
     <div class="text-center mt-10">
-      <a href="{{ url_for('index') }}"
-         class="text-blue-600 hover:underline text-sm">
+      <a href="{{ url_for('index') }}" class="text-blue-400 hover:underline text-sm">
         ← Back to Home
       </a>
     </div>

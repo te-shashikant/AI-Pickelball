@@ -10,12 +10,36 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.lib.units import inch
-from datetime import datetime
 from reportlab.lib.utils import ImageReader
-from flask import render_template
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from pytz import timezone, utc
 
+# ---------- Setup ----------
+app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['GIF_FOLDER'] = 'static/gifs'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///analysis.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+os.makedirs(app.config['GIF_FOLDER'], exist_ok=True)
+
+# ---------- Models ----------
+class Analysis(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    video_id = db.Column(db.String, unique=True, nullable=False)
+    score = db.Column(db.Float, nullable=False)
+    feedback = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: utc.localize(datetime.utcnow()))
+
+# ---------- Utility ----------
+def convert_to_local(utc_dt):
+    if utc_dt.tzinfo is None:
+        utc_dt = utc.localize(utc_dt)
+    local_tz = timezone('Asia/Kolkata')
+    return utc_dt.astimezone(local_tz)
 
 def generate_pdf_report(feedbacks, score, accepted_segments, rejected_segments, pdf_path="analysis_report.pdf"):
     c = canvas.Canvas(pdf_path, pagesize=A4)
@@ -58,7 +82,6 @@ def generate_pdf_report(feedbacks, score, accepted_segments, rejected_segments, 
         write_line(f"• {fb}", font_size=12, indent=10)
     write_line("")
 
-    # Accepted segments
     write_line(f"✅ Accepted Segments: {len(accepted_segments)}", font_size=13, color=colors.green)
     x_img = margin + 20
     for seg in accepted_segments:
@@ -69,7 +92,6 @@ def generate_pdf_report(feedbacks, score, accepted_segments, rejected_segments, 
             y -= 160
     write_line("")
 
-    # Rejected segments
     write_line(f"❌ Rejected Segments: {len(rejected_segments)}", font_size=13, color=colors.red)
     for seg in rejected_segments:
         write_line(f" - From {seg['start']:.2f}s to {seg['end']:.2f}s", font_size=11, indent=10)
@@ -82,30 +104,10 @@ def generate_pdf_report(feedbacks, score, accepted_segments, rejected_segments, 
     c.showPage()
     c.save()
 
-
-app = Flask(__name__)
-
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
-app.config['GIF_FOLDER'] = 'static/gifs'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///analysis.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-os.makedirs(app.config['GIF_FOLDER'], exist_ok=True)
-
-class Analysis(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    video_id = db.Column(db.String, unique=True, nullable=False)
-    score = db.Column(db.Float, nullable=False)
-    feedback = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-
+# ---------- Routes ----------
 @app.route('/')
 def index():
     return render_template('index.html')
-
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
@@ -122,7 +124,6 @@ def upload():
         video.save(video_path)
 
         output_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{video_id}_processed_{filename}")
-
         feedbacks, final_score, accepted_segments, rejected_segments = process_video(video_path, output_path, mode)
 
         gif_output_folder = os.path.join(app.config['GIF_FOLDER'], video_id)
@@ -195,7 +196,6 @@ def upload():
         with open(os.path.join(gif_output_folder, 'feedback.json'), 'w') as f:
             json.dump(feedback_data, f)
 
-        # Save to database
         new_analysis = Analysis(
             video_id=video_id,
             score=final_score,
@@ -208,18 +208,60 @@ def upload():
 
     return render_template('upload.html')
 
-
-
 @app.route('/uploads/<path:filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+@app.route('/feedback/<video_id>')
+def feedback_page(video_id):
+    feedback_file = os.path.join(app.config['GIF_FOLDER'], video_id, 'feedback.json')
+    if not os.path.exists(feedback_file):
+        return 'Feedback not found', 404
+
+    with open(feedback_file, 'r') as f:
+        data = json.load(f)
+
+    return render_template('feedback.html',
+                           video_id=video_id,
+                           score=data['score'],
+                           feedbacks=data['feedbacks'],
+                           segments=data['segments'],
+                           processed_video_url=data.get('processed_video_url'))
+
+@app.route('/export_pdf/<video_id>')
+def export_pdf(video_id):
+    feedback_file = os.path.join(app.config['GIF_FOLDER'], video_id, 'feedback.json')
+    if not os.path.exists(feedback_file):
+        return 'Feedback not found', 404
+
+    with open(feedback_file, 'r') as f:
+        data = json.load(f)
+
+    pdf_filename = f"{video_id}_report.pdf"
+    pdf_path = os.path.join(app.config['GIF_FOLDER'], video_id, pdf_filename)
+
+    generate_pdf_report(
+        feedbacks=data['feedbacks'],
+        score=data['score'],
+        accepted_segments=[
+            {"start": s["start"], "end": s["end"], "thumbnail": s.get("thumbnail")}
+            for s in data['segments'] if s["type"] == "accepted"
+        ],
+        rejected_segments=[
+            {"start": s["start"], "end": s["end"], "reasons": s["reasons"], "thumbnail": s.get("thumbnail")}
+            for s in data['segments'] if s["type"] == "rejected"
+        ],
+        pdf_path=pdf_path
+    )
+
+    return send_from_directory(os.path.join(app.config['GIF_FOLDER'], video_id), pdf_filename, as_attachment=True)
+
 @app.route('/history')
 def history():
     analyses = Analysis.query.order_by(Analysis.created_at.desc()).all()
+    for a in analyses:
+        a.local_created_at = convert_to_local(a.created_at)
     return render_template("history.html", analyses=analyses)
-
-
 
 @app.route('/api/feedback/<video_id>')
 def api_feedback(video_id):
@@ -254,52 +296,6 @@ def api_feedback(video_id):
         "rejected_segments": rejected_segments
     })
 
-
-@app.route('/feedback/<video_id>')
-def feedback_page(video_id):
-    feedback_file = os.path.join(app.config['GIF_FOLDER'], video_id, 'feedback.json')
-    if not os.path.exists(feedback_file):
-        return 'Feedback not found', 404
-
-    with open(feedback_file, 'r') as f:
-        data = json.load(f)
-
-    return render_template('feedback.html',
-                           video_id=video_id,
-                           score=data['score'],
-                           feedbacks=data['feedbacks'],
-                           segments=data['segments'],
-                           processed_video_url=data.get('processed_video_url'))
-
-
-@app.route('/export_pdf/<video_id>')
-def export_pdf(video_id):
-    feedback_file = os.path.join(app.config['GIF_FOLDER'], video_id, 'feedback.json')
-    if not os.path.exists(feedback_file):
-        return 'Feedback not found', 404
-
-    with open(feedback_file, 'r') as f:
-        data = json.load(f)
-
-    pdf_filename = f"{video_id}_report.pdf"
-    pdf_path = os.path.join(app.config['GIF_FOLDER'], video_id, pdf_filename)
-
-    generate_pdf_report(
-        feedbacks=data['feedbacks'],
-        score=data['score'],
-        accepted_segments=[
-            {"start": s["start"], "end": s["end"], "thumbnail": s.get("thumbnail")}
-            for s in data['segments'] if s["type"] == "accepted"
-        ],
-        rejected_segments=[
-            {"start": s["start"], "end": s["end"], "reasons": s["reasons"], "thumbnail": s.get("thumbnail")}
-            for s in data['segments'] if s["type"] == "rejected"
-        ],
-        pdf_path=pdf_path
-    )
-
-    return send_from_directory(os.path.join(app.config['GIF_FOLDER'], video_id), pdf_filename, as_attachment=True)
-
-
+# ---------- Run ----------
 if __name__ == '__main__':
     app.run(debug=True)
