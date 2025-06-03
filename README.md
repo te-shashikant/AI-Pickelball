@@ -1,10 +1,20 @@
-# 🏓 PicklePro- AI coach
+#🏓 PicklePro – AI-Powered Pickleball Pose Feedback App
 
-PicklePro is an AI-powered Pickleball coaching tool that analyzes player posture from videos using YOLO and MediaPipe.
+PicklePro is an AI-based coaching tool that analyzes Pickleball player posture using YOLO and MediaPipe. It provides stroke and serve feedback through a web interface, showing segment-wise feedback with GIFs, thumbnails, scores, and downloadable PDF reports.
 
 ---
 
-## ⚙Installation
+# 🚀 Features
+
+- Upload stroke/serve videos
+- Automatic player and pose detection
+- Segment-wise feedback (accepted/rejected)
+- Final performance score
+- Animated GIFs and thumbnails for each segment
+- PDF report download
+- Simple web interface with history
+
+---
 
 ### Prerequisites
 
