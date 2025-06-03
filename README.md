@@ -18,3 +18,7 @@ PicklePro is an AI-powered Pickleball coaching tool that analyzes player posture
 ```bash
 git clone https://github.com/yourusername/PicklePro.git
 cd PicklePro
+```
+2.Run the Flask app:
+```bash
+python app.py
