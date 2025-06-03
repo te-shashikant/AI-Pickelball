@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PicklePro - Pose Feedback</title>
+
+    <!-- Fonts and Tailwind CSS -->
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&family=Noto+Sans:wght@400;500;700;900&family=Spline+Sans:wght@400;500;700"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- Custom Styles -->
+    <style>
+      body {
+        background: #141a1f;
+        font-family: 'Spline Sans', 'Noto Sans', sans-serif;
+      }
+      .fullscreen-modal {
+        display: none;
+        position: fixed;
+        z-index: 999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        justify-content: center;
+        align-items: center;
+      }
+      .fullscreen-modal img {
+        max-width: 90%;
+        max-height: 90%;
+      }
+      .fullscreen-modal .close {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        color: white;
+        font-size: 40px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body class="text-white">
+    <!-- HEADER -->
+    <header class="flex items-center justify-between border-b border-[#2b3640] px-10 py-3">
+      <div class="flex items-center gap-4">
+        <div class="size-4">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M12.08 24L4 19.25l5.96-10.5 8.08 4.74V4h11.91v9.49l8.08-4.74 5.96 10.5-8.08 4.75 8.08 4.75-5.96 10.5-8.08-4.74v9.49H18.04v-9.49l-8.08 4.74L4 28.75 12.08 24z"
+              fill="currentColor"
+            />
+          </svg>
+        </div>
+        <h2 class="text-lg font-bold">PicklePro</h2>
+      </div>
+      <div class="flex gap-8 items-center">
+        <nav class="flex gap-6 text-sm font-medium">
+          <a href="#">Dashboard</a>
+          <a href="#">Analysis</a>
+          <a href="#">Drills</a>
+          <a href="#">Community</a>
+        </nav>
+        <button class="rounded-xl h-10 px-2.5 bg-[#2b3640]">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+            <path
+              d="M221.8,175.94C216.25,166.38,208,139.33,208,104a80,80,0,1,0-160,0c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0H208a16,16,0,0,0,13.8-24.06ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216Z"
+            />
+          </svg>
+        </button>
+        <div
+          class="size-10 rounded-full bg-cover bg-center"
+          style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD3...');"
+        ></div>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="px-10 py-6 max-w-screen-xl mx-auto">
+     <div class="flex justify-between items-center mb-4">
+      <h1 class="text-[32px] font-bold">Video Analysis Results</h1>
+      <a
+         href="{{ processed_video_url }}"
+         download="picklepro_output.mp4"
+         class="inline-flex items-center gap-2 rounded bg-green-600 px-4 py-2 text-white font-semibold hover:bg-green-700"
+         title="Download processed video"
+       >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
+      </svg>
+      Download Video
+     </a>
+   </div>
+  <p class="text-[#9daebe] mb-6">Review the AI-powered analysis of your pickleball technique.</p>
+
+
+      
+
+      <div class="bg-white/10 rounded-xl p-6 mb-6">
+        <h2 class="text-xl font-bold mb-3">Final Score</h2>
+        <div id="score" class="text-2xl font-bold text-green-400">Loading score...</div>
+      </div>
+
+      <div class="bg-white/10 rounded-xl p-6 mb-6">
+        <h2 class="text-xl font-bold mb-3">Overall Feedback</h2>
+        <ul id="feedback-list" class="list-disc list-inside text-white space-y-2">
+          <li>Loading...</li>
+        </ul>
+      </div>
+
+      <a href="{{ url_for('export_pdf', video_id=video_id) }}" target="_blank">
+        <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mt-4">
+            📄 Download Feedback as PDF
+        </button>
+      </a>
+
+      <a href="{{ url_for('history') }}">
+        <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+           View History
+        </button>
+      </a>
+
+
+
+      <div class="bg-white/10 rounded-xl p-6 mb-6">
+        <h2 class="text-xl font-bold mb-3">Good Posture Analysis</h2>
+        <details class="mb-4">
+          <summary class="cursor-pointer text-white hover:underline">Show Good Posture</summary>
+          <div class="flex flex-wrap gap-4 mt-4" id="accepted-segments">
+            <p>Loading...</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="bg-white/10 rounded-xl p-6">
+        <h2 class="text-xl font-bold mb-3">Bad Posture Analysis</h2>
+        <details class="mb-4">
+          <summary class="cursor-pointer text-white hover:underline">Show Bad Posture</summary>
+          <div class="flex flex-wrap gap-4 mt-4" id="rejected-segments">
+            <p>Loading...</p>
+          </div>
+        </details>
+      </div>
+    </main>
+
+    <!-- FULLSCREEN MODAL -->
+    <div id="fullscreenModal" class="fullscreen-modal">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <img id="modalImage" />
+    </div>
+
+    <!-- SCRIPT -->
+    <script>
+      // Global to track currently playing segment player
+      let currentPlaying = null;
+
+      // Creates a frame player object with play/pause control and adjustable FPS
+      function createFramePlayer(imgElem, speedSlider, frameUrls) {
+        let currentFrame = 0;
+        let fps = speedSlider.value;
+        let lastTime = 0;
+        let playing = true;
+        let animationId;
+
+        function animate(timestamp) {
+          if (!playing) return; // stop animation if paused
+          if (!lastTime) lastTime = timestamp;
+          if (timestamp - lastTime > 1000 / fps) {
+            imgElem.src = frameUrls[currentFrame];
+            currentFrame = (currentFrame + 1) % frameUrls.length;
+            lastTime = timestamp;
+          }
+          animationId = requestAnimationFrame(animate);
+        }
+
+        speedSlider.addEventListener('input', () => {
+          fps = speedSlider.value;
+        });
+
+        // Start animation immediately
+        animationId = requestAnimationFrame(animate);
+
+        return {
+          pause: () => {
+            playing = false;
+            if (animationId) cancelAnimationFrame(animationId);
+            // freeze on first frame or last shown frame
+            imgElem.src = frameUrls[0];
+          },
+          play: () => {
+            if (!playing) {
+              playing = true;
+              lastTime = 0;
+              animationId = requestAnimationFrame(animate);
+            }
+          },
+        };
+      }
+
+      // Show fullscreen modal with full GIF animation at given FPS
+      function showModal(frameUrls, initialFps = 10) {
+        const modal = document.getElementById('fullscreenModal');
+        const img = document.getElementById('modalImage');
+
+        let currentFrame = 0;
+        let fps = initialFps;
+        let lastTime = 0;
+        let animationId;
+
+        function animate(timestamp) {
+          if (!lastTime) lastTime = timestamp;
+          if (timestamp - lastTime > 1000 / fps) {
+            img.src = frameUrls[currentFrame];
+            currentFrame = (currentFrame + 1) % frameUrls.length;
+            lastTime = timestamp;
+          }
+          animationId = requestAnimationFrame(animate);
+        }
+
+        modal.style.display = 'flex';
+
+        // Start animating fullscreen GIF
+        animationId = requestAnimationFrame(animate);
+
+        // Close modal on clicking close button or outside image
+        function closeHandler() {
+          cancelAnimationFrame(animationId);
+          modal.style.display = 'none';
+          modal.removeEventListener('click', outsideClickHandler);
+          document.getElementById('fullscreenModal').querySelector('.close').removeEventListener('click', closeHandler);
+        }
+
+        function outsideClickHandler(event) {
+          if (event.target === modal) closeHandler();
+        }
+
+        modal.addEventListener('click', outsideClickHandler);
+        modal.querySelector('.close').addEventListener('click', closeHandler);
+      }
+
+      // Load feedback data and render segments
+      fetch(window.location.pathname.replace('/feedback', '/api/feedback'))
+        .then((response) => response.json())
+        .then((data) => {
+          document.getElementById('score').textContent = `Final Score: ${data.final_score}`;
+
+          const feedbackList = document.getElementById('feedback-list');
+          feedbackList.innerHTML = '';
+          data.feedbacks.forEach((fb) => {
+            const li = document.createElement('li');
+            li.textContent = fb;
+            feedbackList.appendChild(li);
+          });
+
+          function createSegment(seg, isAccepted) {
+            const div = document.createElement('div');
+            div.className = 'w-64 bg-[#1f2a35] rounded-lg p-4';
+
+            const img = document.createElement('img');
+            img.className = 'w-full rounded cursor-pointer mb-2';
+            div.appendChild(img);
+
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            slider.min = 1;
+            slider.max = 30;
+            slider.value = 10;
+            slider.className = 'w-full';
+            div.appendChild(slider);
+
+            const label = document.createElement('p');
+            label.className = 'text-sm mt-1';
+            label.textContent = 'Playback Speed (FPS)';
+            div.appendChild(label);
+
+            const info = document.createElement('p');
+            info.className = 'text-sm mt-2';
+            info.textContent = `Start: ${seg.start.toFixed(2)}s | End: ${seg.end.toFixed(2)}s`;
+            div.appendChild(info);
+
+            if (!isAccepted && seg.reasons?.length > 0) {
+              const reason = document.createElement('p');
+              reason.className = 'text-sm text-red-400';
+              reason.innerHTML = `<strong>Reasons:</strong> ${seg.reasons.join(', ')}`;
+              div.appendChild(reason);
+            }
+
+            // Create player for this segment
+            const player = createFramePlayer(img, slider, seg.frames);
+
+            // Pause all others when this is clicked, and open fullscreen modal playing full animation
+            img.addEventListener('click', () => {
+              if (currentPlaying && currentPlaying !== player) {
+                currentPlaying.pause();
+              }
+              currentPlaying = player;
+              player.play();
+              showModal(seg.frames, slider.value);
+            });
+
+            // Initially pause the animation (all start paused)
+            player.pause();
+
+            return div;
+          }
+
+          const acceptedContainer = document.getElementById('accepted-segments');
+          acceptedContainer.innerHTML = '';
+          data.accepted_segments.forEach((seg) => {
+            acceptedContainer.appendChild(createSegment(seg, true));
+          });
+
+          const rejectedContainer = document.getElementById('rejected-segments');
+          rejectedContainer.innerHTML = '';
+          data.rejected_segments.forEach((seg) => {
+            rejectedContainer.appendChild(createSegment(seg, false));
+          });
+        })
+        .catch((err) => {
+          console.error('Error loading feedback:', err);
+        });
+    </script>
+  </body>
+</html>

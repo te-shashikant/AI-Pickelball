@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analysis History - PicklePro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-900">
+
+  <div class="max-w-4xl mx-auto py-10 px-4">
+    <h1 class="text-3xl font-bold text-center mb-8 text-blue-700">📜 Analysis History</h1>
+
+    {% if analyses %}
+      <div class="grid grid-cols-1 gap-6">
+        {% for a in analyses %}
+          <div class="bg-white shadow-md rounded-lg p-6 border border-gray-200 hover:shadow-lg transition duration-300">
+            <div class="flex justify-between items-center mb-2">
+              <h2 class="text-lg font-semibold text-blue-600">Video ID: {{ a.video_id }}</h2>
+              <span class="text-sm text-gray-500">{{ a.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            </div>
+            <p class="mb-2"><strong>Score:</strong>
+              <span class="{{ 'text-green-600' if a.score >= 75 else 'text-red-600' }}">{{ a.score }}</span>
+            </p>
+            <p><strong>Feedback:</strong> {{ a.feedback }}</p>
+            <div class="mt-4">
+              <a href="{{ url_for('feedback_page', video_id=a.video_id) }}"
+                 class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm transition">
+                View Full Feedback
+              </a>
+              <a href="{{ url_for('export_pdf', video_id=a.video_id) }}"
+                 class="inline-block ml-2 text-blue-600 underline hover:text-blue-800 text-sm">
+                Download PDF Report
+              </a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-center text-gray-600">No analyses found yet. Upload a video to get started.</p>
+    {% endif %}
+
+    <div class="text-center mt-10">
+      <a href="{{ url_for('index') }}"
+         class="text-blue-600 hover:underline text-sm">
+        ← Back to Home
+      </a>
+    </div>
+  </div>
+
+</body>
+</html>

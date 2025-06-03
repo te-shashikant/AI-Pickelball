@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Upload Video - PicklePro</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
+  <link
+    rel="stylesheet"
+    as="style"
+    onload="this.rel='stylesheet'"
+    href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Spline+Sans%3Awght%40400%3B500%3B700"
+  />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+</head>
+<body class="bg-[#101a23]" style='font-family: "Spline Sans", "Noto Sans", sans-serif;'>
+  <div class="min-h-screen flex flex-col">
+    <header class="flex items-center justify-between border-b border-[#223649] px-10 py-3">
+      <div class="flex items-center gap-4 text-white">
+        <div class="w-10 h-10">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full text-white">
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z"
+              fill="currentColor"
+            />
+          </svg>
+        </div>
+        <h1 class="text-white text-lg font-bold">PicklePro</h1>
+      </div>
+      <nav class="flex items-center gap-6 text-white text-sm font-medium">
+        <a href="/" class="hover:underline">Home</a>
+        <a href="/upload" class="hover:underline">Upload Video</a>
+        <a href="#" class="hover:underline">Progress</a>
+        <a href="#" class="hover:underline">Community</a>
+      </nav>
+    </header>
+
+    <main class="flex-grow px-10 py-12 max-w-xl mx-auto">
+      <h2 class="text-white text-2xl font-semibold mb-6">Upload Your Pickleball Video</h2>
+      {% if error %}
+        <p class="text-red-500 mb-4">{{ error }}</p>
+      {% endif %}
+      <form method="post" enctype="multipart/form-data" class="space-y-6">
+        <div>
+          <label for="video" class="block mb-2 text-white font-medium">Select Video File</label>
+          <input type="file" name="video" id="video" accept="video/*" required class="block w-full text-white bg-[#223649] rounded px-3 py-2"/>
+        </div>
+        <div>
+          <label for="mode" class="block mb-2 text-white font-medium">Analysis Mode</label>
+          <select name="mode" id="mode" class="block w-full text-white bg-[#223649] rounded px-3 py-2">
+            <option value="stroke">Stroke</option>
+            <option value="serve">Serve</option>
+          </select>
+        </div>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded py-3">Upload and Analyze</button>
+      </form>
+    </main>
+
+    <footer class="border-t border-[#223649] text-center text-[#90adcb] py-6">
+      &copy; 2024 PicklePro. All rights reserved.
+    </footer>
+  </div>
+</body>
+</html>
