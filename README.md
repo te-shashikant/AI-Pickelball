@@ -21,7 +21,7 @@ PicklePro is an AI-based coaching tool that analyzes Pickleball player posture u
 Install required Python packages:
 
 ```bash
-pip install flask flask_sqlalchemy opencv-python mediapipe pillow numpy matplotlib ultralytics
+pip install flask flask_sqlalchemy opencv-python mediapipe pillow numpy matplotlib ultralytics reportlab
 
 ```
 ### Setup Steps
