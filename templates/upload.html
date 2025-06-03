@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Upload Video - PicklePro</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
+  <link
+    rel="stylesheet"
+    as="style"
+    onload="this.rel='stylesheet'"
+    href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Spline+Sans%3Awght%40400%3B500%3B700"
+  />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+</head>
+<body class="bg-[#101a23]" style='font-family: "Spline Sans", "Noto Sans", sans-serif;'>
+  <div class="min-h-screen flex flex-col relative">
+    <header class="flex items-center justify-between border-b border-[#223649] px-10 py-3">
+      <div class="flex items-center gap-4 text-white">
+        <div class="w-10 h-10">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full text-white">
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z"
+              fill="currentColor"
+            />
+          </svg>
+        </div>
+        <h1 class="text-white text-lg font-bold">PicklePro</h1>
+      </div>
+      <nav class="flex items-center gap-6 text-white text-sm font-medium">
+        <a href="/" class="hover:underline">Home</a>
+        <a href="/upload" class="hover:underline">Upload Video</a>
+        <a href="#" class="hover:underline">Progress</a>
+        <a href="#" class="hover:underline">Community</a>
+      </nav>
+    </header>
+
+    <main class="flex-grow px-10 py-12 max-w-xl mx-auto">
+      <h2 class="text-white text-2xl font-semibold mb-6">Upload Your Pickleball Video</h2>
+      {% if error %}
+        <p class="text-red-500 mb-4">{{ error }}</p>
+      {% endif %}
+      <form method="post" enctype="multipart/form-data" class="space-y-6 relative" id="uploadForm">
+        <!-- Video Input -->
+        <div>
+          <label for="video" class="block mb-2 text-white font-medium">Select Video File</label>
+          <div class="relative flex items-center">
+            <input type="file" name="video" id="video" accept="video/*" required
+              class="w-full text-white bg-[#223649] rounded px-3 py-2 pr-10" />
+            <button type="button" id="cancelBtn"
+              class="absolute right-2 text-white hover:text-red-400 p-1 rounded-full bg-transparent"
+              title="Clear file" style="display: none;">
+              <!-- Trash icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7L5 7M10 11v6M14 11v6M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mode -->
+        <div>
+          <label for="mode" class="block mb-2 text-white font-medium">Analysis Mode</label>
+          <select name="mode" id="mode"
+            class="block w-full text-white bg-[#223649] rounded px-3 py-2">
+            <option value="stroke">Stroke</option>
+            <option value="serve">Serve</option>
+          </select>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded py-3">
+          Upload and Analyze
+        </button>
+
+        <!-- Spinner -->
+        <div id="loader" class="absolute inset-0 bg-[#101a23]/80 flex-col items-center justify-center hidden z-10">
+          <div class="flex flex-col items-center justify-center min-h-[300px]">
+            <svg class="animate-spin h-10 w-10 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+              viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+            </svg>
+            <p class="text-white text-sm">Analyzing your video, please wait...</p>
+          </div>
+        </div>
+      </form>
+    </main>
+
+    <footer class="border-t border-[#223649] text-center text-[#90adcb] py-6">
+      &copy; 2024 PicklePro. All rights reserved.
+    </footer>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    const cancelBtn = document.getElementById('cancelBtn');
+    const videoInput = document.getElementById('video');
+    const form = document.getElementById('uploadForm');
+    const loader = document.getElementById('loader');
+
+    videoInput.addEventListener('change', function () {
+      cancelBtn.style.display = videoInput.files.length > 0 ? 'inline' : 'none';
+    });
+
+    cancelBtn.addEventListener('click', function () {
+      videoInput.value = '';
+      cancelBtn.style.display = 'none';
+    });
+
+    form.addEventListener('submit', function () {
+      loader.classList.remove('hidden');
+    });
+  </script>
+</body>
+</html>
