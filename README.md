@@ -40,7 +40,7 @@ After cloning the repository, install all required packages using:
 ```bash
 pip install -r requirements.txt
 
-''
+```
 
 3.Run the Flask app:
 ```bash
