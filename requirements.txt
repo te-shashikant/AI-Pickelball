@@ -1,8 +1,0 @@
-Flask
-flask_sqlalchemy
-opencv-python
-Pillow
-mediapipe
-ultralytics
-reportlab
-pytz
