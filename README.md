@@ -4,7 +4,7 @@ PicklePro is an AI-based coaching tool that analyzes Pickleball player posture u
 
 ---
 
-## 🚀 Features
+## 🚀 Features ##
 
 - Upload stroke/serve videos
 - Automatic player and pose detection
