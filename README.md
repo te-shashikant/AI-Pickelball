@@ -32,6 +32,16 @@ pip install flask flask_sqlalchemy opencv-python mediapipe pillow numpy matplotl
 git clone https://github.com/yourusername/PicklePro.git
 cd PicklePro
 ```
-2.Run the Flask app:
+
+2.  Install Dependencies
+
+After cloning the repository, install all required packages using:
+
+```bash
+pip install -r requirements.txt
+
+''
+
+3.Run the Flask app:
 ```bash
 python app.py
